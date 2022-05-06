@@ -3,21 +3,24 @@ package org.rsmod.pathfinder.collision
 import org.rsmod.pathfinder.flag.CollisionFlag
 
 public interface CollisionStrategy {
-
     public fun canMove(tileFlag: Int, blockFlag: Int): Boolean
 }
 
 public class NormalBlockFlagCollision : CollisionStrategy {
-
     override fun canMove(tileFlag: Int, blockFlag: Int): Boolean {
         return (tileFlag and blockFlag) == 0
+    }
+}
+
+public class RoofBoundFlagCollision : CollisionStrategy {
+    override fun canMove(tileFlag: Int, blockFlag: Int): Boolean {
+        return (tileFlag and blockFlag) == 0 && (tileFlag and CollisionFlag.ROOF) != 0
     }
 }
 
 public class InverseBlockFlagCollision(
     private val inverseFlag: Int
 ) : CollisionStrategy {
-
     override fun canMove(tileFlag: Int, blockFlag: Int): Boolean {
         val flag = blockFlag and inverseFlag.inv()
         return (tileFlag and flag) == 0 && (tileFlag and inverseFlag) != 0
@@ -25,7 +28,6 @@ public class InverseBlockFlagCollision(
 }
 
 public class LineOfSightBlockFlagCollision : CollisionStrategy {
-
     override fun canMove(tileFlag: Int, blockFlag: Int): Boolean {
         val movementFlags = (blockFlag and BLOCK_MOVEMENT) shl 9
         val routeFlags = (blockFlag and BLOCK_ROUTE) shr 13

@@ -23,9 +23,23 @@ public object CollisionFlag {
     public const val WALL_WEST_PROJECTILE_BLOCKER: Int = 0x10000
     public const val OBJECT_PROJECTILE_BLOCKER: Int = 0x20000
     public const val FLOOR_DECORATION: Int = 0x40000
-    /*private const val NOT_IN_USE_BIT_20: Int = 0x80000 */
 
-    /*private const val NOT_IN_USE_BIT_21: Int = 0x100000 */
+    /**
+     * Custom flag dedicated to blocking NPCs.
+     * It should be noted that this is a custom flag, and you do not need to use this.
+     * The pathfinder takes the flag as a custom option, so you may use any other flag, this just defines
+     * a reliable constant to use
+     */
+    public const val BLOCK_NPCS: Int = 0x80000
+
+    /**
+     * Custom flag dedicated to blocking players, projectiles as well as NPCs.
+     * An example of a monster to set this flag is Brawler. Note that it is unclear if this flag
+     * prevents NPCs, as there is a separate flag option for it.
+     * This flag is similar to the one above, except it's strictly for NPCs.
+     */
+    public const val BLOCK_PLAYERS: Int = 0x100000
+
     public const val FLOOR: Int = 0x200000
     public const val WALL_NORTH_WEST_ROUTE_BLOCKER: Int = 0x400000
     public const val WALL_NORTH_ROUTE_BLOCKER: Int = 0x800000
@@ -36,7 +50,11 @@ public object CollisionFlag {
     public const val WALL_SOUTH_WEST_ROUTE_BLOCKER: Int = 0x10000000
     public const val WALL_WEST_ROUTE_BLOCKER: Int = 0x20000000
     public const val OBJECT_ROUTE_BLOCKER: Int = 0x40000000
-    /*private const val NOT_IN_USE_BIT_31: Int = 0x80000000*/
+
+    /**
+     * Roof flag, used to bind NPCs to not leave the buildings they spawn in. This is a custom flag.
+     */
+    public const val ROOF: Int = 0x80000000.toInt()
 
     /* A shorthand combination of both the floor flags. */
     private const val FLOOR_BLOCKED = FLOOR or FLOOR_DECORATION
