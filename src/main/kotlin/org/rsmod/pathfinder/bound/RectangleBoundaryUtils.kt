@@ -39,9 +39,6 @@ public object RectangleBoundaryUtils {
         val east = destX + destWidth - 1
         val north = destY + destHeight - 1
 
-        if (x in destX..east && y in destY..north)
-            return false
-
         if (x == destX - 1 && y >= destY && y <= north &&
             (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_EAST) == 0 &&
             (accessBitMask and AccessBitFlag.BLOCK_WEST) == 0

@@ -31,16 +31,20 @@ internal fun reachRectangle(
                 destHeight
             )
     }
-    else -> RectangleBoundaryUtils.reachRectangle1(
-        flags,
-        defaultFlag,
-        x,
-        y,
-        z,
-        accessBitMask,
-        destX,
-        destY,
-        destWidth,
-        destHeight
-    )
+
+    else ->
+        RectangleBoundaryUtils
+            .collides(x, y, destX, destY, srcSize, srcSize, destWidth, destHeight) ||
+            RectangleBoundaryUtils.reachRectangle1(
+                flags,
+                defaultFlag,
+                x,
+                y,
+                z,
+                accessBitMask,
+                destX,
+                destY,
+                destWidth,
+                destHeight
+            )
 }
