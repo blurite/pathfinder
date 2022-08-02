@@ -17,8 +17,8 @@ internal fun reachWallDeco(
     rot: Int
 ): Boolean = when {
     srcSize == 1 && x == destX && destY == y -> true
-    srcSize != 1 && destX >= x && srcSize + x + -1 >= destX &&
-        srcSize + destY + -1 >= destY -> true
+    srcSize != 1 && destX >= x && srcSize + x - 1 >= destX &&
+        destY >= y && srcSize + y - 1 >= destY -> true
     srcSize == 1 -> reachWallDeco1(
         flags,
         defaultFlag,
