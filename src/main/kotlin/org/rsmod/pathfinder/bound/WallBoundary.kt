@@ -18,7 +18,7 @@ internal fun reachWall(
 ): Boolean = when {
     srcSize == 1 && x == destX && y == destY -> true
     srcSize != 1 && destX >= x && srcSize + x - 1 >= destX &&
-        destY >= y && srcSize + destY - 1 >= destY -> true
+        destY >= y && srcSize + y - 1 >= destY -> true
     srcSize == 1 -> reachWall1(
         flags,
         defaultFlag,
