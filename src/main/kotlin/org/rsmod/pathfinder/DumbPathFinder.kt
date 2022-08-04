@@ -7,9 +7,15 @@ import org.rsmod.pathfinder.reach.ReachStrategy
 import kotlin.math.abs
 import kotlin.math.sign
 
-/**
- * @author Kris | 15/03/2022
- */
+@Deprecated(
+    """
+    Deprecated as the dumb pathfinder is not an actual thing, instead the same code that is used
+    to interpolate the tiles of the checkpoints provided by the smart pathfinder is used to
+    generate the dumb paths. It is highly advised to switch to that implementation and lazily yield the
+    tiles rather than continuously generate the dumb paths, as the two could have differentiating
+    results when considering other moving creatures that might be interfering with the paths.
+"""
+)
 public class DumbPathFinder(
     private val flags: Array<IntArray?>,
     private val defaultFlag: Int,
