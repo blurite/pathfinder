@@ -10,7 +10,9 @@ import org.rsmod.pathfinder.reach.ReachStrategy
 private const val DEFAULT_RESET_ON_SEARCH = true
 internal const val DEFAULT_SEARCH_MAP_SIZE = 128
 private const val DEFAULT_RING_BUFFER_SIZE = 4096
-private const val DEFAULT_DISTANCE_VALUE = 99_999_999
+
+// The default in the client is 99_999_999, which is rather excessive
+private const val DEFAULT_DISTANCE_VALUE = 127
 private const val DEFAULT_SRC_DIRECTION_VALUE = 99
 private const val MAX_ALTERNATIVE_ROUTE_LOWEST_COST = 1000
 private const val MAX_ALTERNATIVE_ROUTE_SEEK_RANGE = 100
@@ -18,12 +20,15 @@ private const val MAX_ALTERNATIVE_ROUTE_DISTANCE_FROM_DESTINATION = 10
 private const val DEFAULT_MOVE_NEAR_FLAG = true
 private const val DEFAULT_ROUTE_BLOCKER_FLAGS = false
 private const val INITIAL_DEQUE_SIZE = 25
+private const val DIRECTION_BITS_REQUIRED = 7
 
 public class SmartPathFinder(
     private val resetOnSearch: Boolean = DEFAULT_RESET_ON_SEARCH,
     private val searchMapSize: Int = DEFAULT_SEARCH_MAP_SIZE,
     private val ringBufferSize: Int = DEFAULT_RING_BUFFER_SIZE,
-    private val graphInfo: IntArray = IntArray(searchMapSize * searchMapSize),
+    private val graphInfo: IntArray = IntArray(searchMapSize * searchMapSize) {
+        DEFAULT_DISTANCE_VALUE shl DIRECTION_BITS_REQUIRED
+    },
     private val validLocalX: IntArray = IntArray(ringBufferSize),
     private val validLocalY: IntArray = IntArray(ringBufferSize),
     private var bufReaderIndex: Int = 0,
@@ -35,7 +40,25 @@ public class SmartPathFinder(
     private val defaultFlag: Int,
     private val moveNear: Boolean = DEFAULT_MOVE_NEAR_FLAG,
     private val initialDequeSize: Int = INITIAL_DEQUE_SIZE,
+    private val defaultDistance: Int = DEFAULT_DISTANCE_VALUE,
 ) : PathFinder {
+
+    private val distanceBits: Int = computeDistanceBits()
+    private val iterationOffsetInBits = DIRECTION_BITS_REQUIRED + distanceBits
+    private val maxDistance = (1 shl distanceBits) - 1
+    private val iterationBits = Int.SIZE_BITS - DIRECTION_BITS_REQUIRED - distanceBits
+    private val maxIteration = (1 shl iterationBits) - 1
+    private var currentIteration: Int = 0
+
+    private fun numBits(num: Int): Int {
+        val highestBitValue = num.takeHighestOneBit()
+        return Int.SIZE_BITS - highestBitValue.countLeadingZeroBits()
+    }
+
+    private fun computeDistanceBits(): Int {
+        /* The maximum distance from the start(center) to the edge, accounting for the 10x10 alt search */
+        return numBits((searchMapSize / 2) + 10)
+    }
 
     public override fun findPath(
         srcX: Int,
@@ -54,8 +77,11 @@ public class SmartPathFinder(
         collision: CollisionStrategy,
         reachStrategy: ReachStrategy
     ): Route {
-        if (resetOnSearch) {
-            reset()
+        currentIteration = (currentIteration + 1) and maxIteration
+        if (currentIteration == maxIteration) {
+            if (resetOnSearch) {
+                reset()
+            }
         }
         val baseX = srcX - (searchMapSize / 2)
         val baseY = srcY - (searchMapSize / 2)
@@ -1454,14 +1480,16 @@ public class SmartPathFinder(
     }
 
     private fun reset() {
-        graphInfo.fill(DEFAULT_DISTANCE_VALUE shl 7)
+        graphInfo.fill(DEFAULT_DISTANCE_VALUE shl DIRECTION_BITS_REQUIRED)
         bufReaderIndex = 0
         bufWriterIndex = 0
     }
 
     private fun setNextValidLocalCoords(localX: Int, localY: Int, direction: Int, distance: Int) {
         val pathIndex = (localY * searchMapSize) + localX
-        val bitpacked = direction or (distance shl 7)
+        val bitpacked = direction or
+            (distance shl DIRECTION_BITS_REQUIRED) or
+            (currentIteration shl (DIRECTION_BITS_REQUIRED + distanceBits))
         graphInfo[pathIndex] = bitpacked
         validLocalX[bufWriterIndex] = localX
         validLocalY[bufWriterIndex] = localY
@@ -1470,14 +1498,22 @@ public class SmartPathFinder(
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun getDistance(localX: Int, localY: Int): Int {
-        val pathIndex = (localY * searchMapSize) + localX
-        return graphInfo[pathIndex] ushr 7
+        val info = graphInfo[(localY * searchMapSize) + localX] ushr DIRECTION_BITS_REQUIRED
+        val iteration = info ushr distanceBits
+        if (iteration != currentIteration) {
+            return defaultDistance
+        }
+        return info and maxDistance
     }
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun getDirection(localX: Int, localY: Int): Int {
-        val pathIndex = (localY * searchMapSize) + localX
-        return graphInfo[pathIndex] and 0x7F
+        val info = graphInfo[(localY * searchMapSize) + localX]
+        val iteration = info ushr iterationOffsetInBits
+        if (iteration != currentIteration) {
+            return 0
+        }
+        return info and 0x7F
     }
 
     @Suppress("NOTHING_TO_INLINE")
