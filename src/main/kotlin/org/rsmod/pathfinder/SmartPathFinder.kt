@@ -78,10 +78,8 @@ public class SmartPathFinder(
         reachStrategy: ReachStrategy
     ): Route {
         currentIteration = (currentIteration + 1) and maxIteration
-        if (currentIteration == maxIteration) {
-            if (resetOnSearch) {
-                reset()
-            }
+        if (resetOnSearch) {
+            reset(currentIteration == maxIteration)
         }
         val baseX = srcX - (searchMapSize / 2)
         val baseY = srcY - (searchMapSize / 2)
@@ -208,11 +206,9 @@ public class SmartPathFinder(
         val coordinates = ArrayDeque<RouteCoordinates>(initialDequeSize)
         var nextDir = getDirection(currLocalX, currLocalY)
         var currDir = -1
-        var turns = 0
         for (i in 0 until searchMapSize * searchMapSize) {
             if (currLocalX == localSrcX && currLocalY == localSrcY) break
             if (currDir != nextDir) {
-                turns++
                 if (coordinates.size >= maxTurns) coordinates.removeLast()
                 val coords = RouteCoordinates(currLocalX + baseX, currLocalY + baseY)
                 coordinates.addFirst(coords)
@@ -1479,8 +1475,10 @@ public class SmartPathFinder(
             )
     }
 
-    private fun reset() {
-        graphInfo.fill(DEFAULT_DISTANCE_VALUE shl DIRECTION_BITS_REQUIRED)
+    private fun reset(clearArray: Boolean) {
+        if (clearArray) {
+            graphInfo.fill(DEFAULT_DISTANCE_VALUE shl DIRECTION_BITS_REQUIRED)
+        }
         bufReaderIndex = 0
         bufWriterIndex = 0
     }
@@ -1488,8 +1486,8 @@ public class SmartPathFinder(
     private fun setNextValidLocalCoords(localX: Int, localY: Int, direction: Int, distance: Int) {
         val pathIndex = (localY * searchMapSize) + localX
         val bitpacked = direction or
-            (distance shl DIRECTION_BITS_REQUIRED) or
-            (currentIteration shl (DIRECTION_BITS_REQUIRED + distanceBits))
+            (distance shl DIRECTION_BITS_REQUIRED) or // distance << 7
+            (currentIteration shl iterationOffsetInBits) // currentIteration << 14
         graphInfo[pathIndex] = bitpacked
         validLocalX[bufWriterIndex] = localX
         validLocalY[bufWriterIndex] = localY
@@ -1498,18 +1496,18 @@ public class SmartPathFinder(
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun getDistance(localX: Int, localY: Int): Int {
-        val info = graphInfo[(localY * searchMapSize) + localX] ushr DIRECTION_BITS_REQUIRED
-        val iteration = info ushr distanceBits
+        val info = graphInfo[(localY * searchMapSize) + localX] ushr DIRECTION_BITS_REQUIRED // graph >>> 7
+        val iteration = info ushr distanceBits // info >>> 7
         if (iteration != currentIteration) {
             return defaultDistance
         }
-        return info and maxDistance
+        return info and maxDistance // info & 0x7f?
     }
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun getDirection(localX: Int, localY: Int): Int {
-        val info = graphInfo[(localY * searchMapSize) + localX]
-        val iteration = info ushr iterationOffsetInBits
+        val info = graphInfo[(localY * searchMapSize) + localX] // info
+        val iteration = info ushr iterationOffsetInBits // info >> 14
         if (iteration != currentIteration) {
             return 0
         }
