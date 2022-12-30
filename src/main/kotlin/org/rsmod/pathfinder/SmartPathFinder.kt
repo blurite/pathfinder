@@ -1470,13 +1470,13 @@ public class SmartPathFinder(
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun getDistance(localX: Int, localY: Int): Int {
-        val pathIndex = (localX * searchMapSize) + localY
+        val pathIndex = (localY * searchMapSize) + localX
         return graphInfo[pathIndex] ushr 7
     }
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun getDirection(localX: Int, localY: Int): Int {
-        val pathIndex = (localX * searchMapSize) + localY
+        val pathIndex = (localY * searchMapSize) + localX
         return graphInfo[pathIndex] and 0x7F
     }
 
