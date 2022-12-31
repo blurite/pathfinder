@@ -4,7 +4,6 @@ public interface ReachStrategy {
 
     public fun reached(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         x: Int,
         y: Int,
         z: Int,

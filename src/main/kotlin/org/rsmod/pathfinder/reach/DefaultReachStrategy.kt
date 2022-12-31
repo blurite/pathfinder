@@ -15,7 +15,6 @@ public object DefaultReachStrategy : ReachStrategy {
 
     override fun reached(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         x: Int,
         y: Int,
         z: Int,
@@ -36,7 +35,6 @@ public object DefaultReachStrategy : ReachStrategy {
         return when (exitStrategy) {
             WALL_STRATEGY -> reachWall(
                 flags,
-                defaultFlag,
                 x,
                 y,
                 z,
@@ -46,9 +44,9 @@ public object DefaultReachStrategy : ReachStrategy {
                 shape,
                 rotation
             )
+
             WALL_DECO_STRATEGY -> reachWallDeco(
                 flags,
-                defaultFlag,
                 x,
                 y,
                 z,
@@ -58,9 +56,9 @@ public object DefaultReachStrategy : ReachStrategy {
                 shape,
                 rotation
             )
+
             RECTANGLE_STRATEGY -> reachRectangle(
                 flags,
-                defaultFlag,
                 x,
                 y,
                 z,
@@ -71,9 +69,9 @@ public object DefaultReachStrategy : ReachStrategy {
                 destWidth,
                 destHeight
             )
+
             RECTANGLE_EXCLUSIVE_STRATEGY -> reachExclusiveRectangle(
                 flags,
-                defaultFlag,
                 x,
                 y,
                 z,
@@ -84,6 +82,7 @@ public object DefaultReachStrategy : ReachStrategy {
                 destWidth,
                 destHeight
             )
+
             else -> false
         }
     }

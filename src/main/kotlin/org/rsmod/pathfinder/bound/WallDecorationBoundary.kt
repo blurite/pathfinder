@@ -6,7 +6,6 @@ import org.rsmod.pathfinder.flag.CollisionFlag
 
 internal fun reachWallDeco(
     flags: Array<IntArray?>,
-    defaultFlag: Int,
     x: Int,
     y: Int,
     z: Int,
@@ -19,9 +18,9 @@ internal fun reachWallDeco(
     srcSize == 1 && x == destX && destY == y -> true
     srcSize != 1 && destX >= x && srcSize + x - 1 >= destX &&
         destY >= y && srcSize + y - 1 >= destY -> true
+
     srcSize == 1 -> reachWallDeco1(
         flags,
-        defaultFlag,
         x,
         y,
         z,
@@ -30,9 +29,9 @@ internal fun reachWallDeco(
         shape,
         rot
     )
+
     else -> reachWallDecoN(
         flags,
-        defaultFlag,
         x,
         y,
         z,
@@ -46,7 +45,6 @@ internal fun reachWallDeco(
 
 private fun reachWallDeco1(
     flags: Array<IntArray?>,
-    defaultFlag: Int,
     x: Int,
     y: Int,
     z: Int,
@@ -59,57 +57,59 @@ private fun reachWallDeco1(
         when (rot.alteredRotation(shape)) {
             0 -> {
                 if (x == destX + 1 && y == destY &&
-                    (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_WEST) == 0
+                    (flags[x, y, z] and CollisionFlag.WALL_WEST) == 0
                 ) return true
                 if (x == destX && y == destY - 1 &&
-                    (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_NORTH) == 0
+                    (flags[x, y, z] and CollisionFlag.WALL_NORTH) == 0
                 ) return true
             }
+
             1 -> {
                 if (x == destX - 1 && y == destY &&
-                    (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_EAST) == 0
+                    (flags[x, y, z] and CollisionFlag.WALL_EAST) == 0
                 ) return true
                 if (x == destX && y == destY - 1 &&
-                    (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_NORTH) == 0
+                    (flags[x, y, z] and CollisionFlag.WALL_NORTH) == 0
                 ) return true
             }
+
             2 -> {
                 if (x == destX - 1 && y == destY &&
-                    (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_EAST) == 0
+                    (flags[x, y, z] and CollisionFlag.WALL_EAST) == 0
                 ) return true
                 if (x == destX && y == destY + 1 &&
-                    (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_SOUTH) == 0
+                    (flags[x, y, z] and CollisionFlag.WALL_SOUTH) == 0
                 ) return true
             }
+
             3 -> {
                 if (x == destX + 1 && y == destY &&
-                    (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_WEST) == 0
+                    (flags[x, y, z] and CollisionFlag.WALL_WEST) == 0
                 ) return true
                 if (x == destX && y == destY + 1 &&
-                    (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_SOUTH) == 0
+                    (flags[x, y, z] and CollisionFlag.WALL_SOUTH) == 0
                 ) return true
             }
         }
     } else if (shape == 8) {
         if (x == destX && y == destY + 1 &&
-            (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_SOUTH) == 0
+            (flags[x, y, z] and CollisionFlag.WALL_SOUTH) == 0
         ) return true
         if (x == destX && y == destY - 1 &&
-            (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_NORTH) == 0
+            (flags[x, y, z] and CollisionFlag.WALL_NORTH) == 0
         ) return true
         if (x == destX - 1 && y == destY &&
-            (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_EAST) == 0
+            (flags[x, y, z] and CollisionFlag.WALL_EAST) == 0
         ) return true
 
         return x == destX + 1 && y == destY &&
-            (flags[defaultFlag, x, y, z] and CollisionFlag.WALL_WEST) == 0
+            (flags[x, y, z] and CollisionFlag.WALL_WEST) == 0
     }
     return false
 }
 
 private fun reachWallDecoN(
     flags: Array<IntArray?>,
-    defaultFlag: Int,
     x: Int,
     y: Int,
     z: Int,
@@ -125,50 +125,53 @@ private fun reachWallDecoN(
         when (rot.alteredRotation(shape)) {
             0 -> {
                 if (x == destX + 1 && y <= destY && north >= destY &&
-                    (flags[defaultFlag, x, destY, z] and CollisionFlag.WALL_WEST) == 0
+                    (flags[x, destY, z] and CollisionFlag.WALL_WEST) == 0
                 ) return true
                 if (x <= destX && y == destY - srcSize && east >= destX &&
-                    (flags[defaultFlag, destX, north, z] and CollisionFlag.WALL_NORTH) == 0
+                    (flags[destX, north, z] and CollisionFlag.WALL_NORTH) == 0
                 ) return true
             }
+
             1 -> {
                 if (x == destX - srcSize && y <= destY && north >= destY &&
-                    (flags[defaultFlag, east, destY, z] and CollisionFlag.WALL_EAST) == 0
+                    (flags[east, destY, z] and CollisionFlag.WALL_EAST) == 0
                 ) return true
                 if (x <= destX && y == destY - srcSize && east >= destX &&
-                    (flags[defaultFlag, destX, north, z] and CollisionFlag.WALL_NORTH) == 0
+                    (flags[destX, north, z] and CollisionFlag.WALL_NORTH) == 0
                 ) return true
             }
+
             2 -> {
                 if (x == destX - srcSize && y <= destY && north >= destY &&
-                    (flags[defaultFlag, east, destY, z] and CollisionFlag.WALL_EAST) == 0
+                    (flags[east, destY, z] and CollisionFlag.WALL_EAST) == 0
                 ) return true
                 if (x <= destX && y == destY + 1 && east >= destX &&
-                    (flags[defaultFlag, destX, y, z] and CollisionFlag.WALL_SOUTH) == 0
+                    (flags[destX, y, z] and CollisionFlag.WALL_SOUTH) == 0
                 ) return true
             }
+
             3 -> {
                 if (x == destX + 1 && y <= destY && north >= destY &&
-                    (flags[defaultFlag, x, destY, z] and CollisionFlag.WALL_WEST) == 0
+                    (flags[x, destY, z] and CollisionFlag.WALL_WEST) == 0
                 ) return true
                 if (x <= destX && y == destY + 1 && east >= destX &&
-                    (flags[defaultFlag, destX, y, z] and CollisionFlag.WALL_SOUTH) == 0
+                    (flags[destX, y, z] and CollisionFlag.WALL_SOUTH) == 0
                 ) return true
             }
         }
     } else if (shape == 8) {
         if (x <= destX && y == destY + 1 && east >= destX &&
-            (flags[defaultFlag, destX, y, z] and CollisionFlag.WALL_SOUTH) == 0
+            (flags[destX, y, z] and CollisionFlag.WALL_SOUTH) == 0
         ) return true
         if (x <= destX && y == destY - srcSize && east >= destX &&
-            (flags[defaultFlag, destX, north, z] and CollisionFlag.WALL_NORTH) == 0
+            (flags[destX, north, z] and CollisionFlag.WALL_NORTH) == 0
         ) return true
         if (x == destX - srcSize && y <= destY && north >= destY &&
-            (flags[defaultFlag, east, destY, z] and CollisionFlag.WALL_EAST) == 0
+            (flags[east, destY, z] and CollisionFlag.WALL_EAST) == 0
         ) return true
 
         return x == destX + 1 && y <= destY && north >= destY &&
-            (flags[defaultFlag, x, destY, z] and CollisionFlag.WALL_WEST) == 0
+            (flags[x, destY, z] and CollisionFlag.WALL_WEST) == 0
     }
     return false
 }
@@ -179,12 +182,11 @@ private fun Int.alteredRotation(shape: Int): Int {
 
 @Suppress("NOTHING_TO_INLINE")
 private inline operator fun Array<IntArray?>.get(
-    defaultFlag: Int,
     x: Int,
     y: Int,
     z: Int
 ): Int {
-    val zone = this[getZoneIndex(x, y, z)] ?: return defaultFlag
+    val zone = this[getZoneIndex(x, y, z)] ?: return 0
     return zone[getIndexInZone(x, y)]
 }
 

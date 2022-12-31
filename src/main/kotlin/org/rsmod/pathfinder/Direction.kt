@@ -16,7 +16,6 @@ internal sealed class Direction(
 
     inline fun isBlocked(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -24,14 +23,13 @@ internal sealed class Direction(
         collisionStrategy: CollisionStrategy,
         size: Int
     ): Boolean = when (size) {
-        1 -> isBlocked1(flags, defaultFlag, extraFlag, x, y, level, collisionStrategy)
-        2 -> isBlocked2(flags, defaultFlag, extraFlag, x, y, level, collisionStrategy)
-        else -> isBlockedN(flags, defaultFlag, extraFlag, x, y, level, size, collisionStrategy)
+        1 -> isBlocked1(flags, extraFlag, x, y, level, collisionStrategy)
+        2 -> isBlocked2(flags, extraFlag, x, y, level, collisionStrategy)
+        else -> isBlockedN(flags, extraFlag, x, y, level, size, collisionStrategy)
     }
 
     abstract fun isBlocked1(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -41,7 +39,6 @@ internal sealed class Direction(
 
     abstract fun isBlocked2(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -51,7 +48,6 @@ internal sealed class Direction(
 
     abstract fun isBlockedN(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -60,8 +56,8 @@ internal sealed class Direction(
         collisionStrategy: CollisionStrategy
     ): Boolean
 
-    inline operator fun Array<IntArray?>.get(x: Int, y: Int, level: Int, defaultFlag: Int): Int {
-        val zone = this[getZoneIndex(x, y, level)] ?: return defaultFlag
+    inline operator fun Array<IntArray?>.get(x: Int, y: Int, level: Int): Int {
+        val zone = this[getZoneIndex(x, y, level)] ?: return 0
         return zone[getIndexInZone(x, y)]
     }
 
@@ -74,32 +70,29 @@ internal sealed class Direction(
 internal object South : Direction(0, -1) {
     override fun isBlocked1(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
         level: Int,
         collisionStrategy: CollisionStrategy
-    ): Boolean = !collisionStrategy.canMove(flags[x, y - 1, level, defaultFlag], CollisionFlag.BLOCK_SOUTH or extraFlag)
+    ): Boolean = !collisionStrategy.canMove(flags[x, y - 1, level], CollisionFlag.BLOCK_SOUTH or extraFlag)
 
     override fun isBlocked2(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
         level: Int,
         collisionStrategy: CollisionStrategy
     ): Boolean =
-        !collisionStrategy.canMove(flags[x, y - 1, level, defaultFlag], CollisionFlag.BLOCK_SOUTH_WEST or extraFlag) ||
+        !collisionStrategy.canMove(flags[x, y - 1, level], CollisionFlag.BLOCK_SOUTH_WEST or extraFlag) ||
             !collisionStrategy.canMove(
-                flags[x + 1, y - 1, level, defaultFlag],
+                flags[x + 1, y - 1, level],
                 CollisionFlag.BLOCK_SOUTH_EAST or extraFlag
             )
 
     override fun isBlockedN(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -108,17 +101,17 @@ internal object South : Direction(0, -1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         if (!collisionStrategy.canMove(
-                flags[x, y - 1, level, defaultFlag],
+                flags[x, y - 1, level],
                 CollisionFlag.BLOCK_SOUTH_WEST or extraFlag
             ) ||
             !collisionStrategy.canMove(
-                    flags[x + size - 1, y - 1, level, defaultFlag],
+                    flags[x + size - 1, y - 1, level],
                     CollisionFlag.BLOCK_SOUTH_EAST or extraFlag
                 )
         ) return true
         for (midX in x + 1 until x + size - 1) {
             if (!collisionStrategy.canMove(
-                    flags[midX, y - 1, level, defaultFlag],
+                    flags[midX, y - 1, level],
                     CollisionFlag.BLOCK_NORTH_EAST_AND_WEST or extraFlag
                 )
             ) {
@@ -135,32 +128,29 @@ internal object South : Direction(0, -1) {
 internal object North : Direction(0, 1) {
     override fun isBlocked1(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
         level: Int,
         collisionStrategy: CollisionStrategy
-    ): Boolean = !collisionStrategy.canMove(flags[x, y + 1, level, defaultFlag], CollisionFlag.BLOCK_NORTH or extraFlag)
+    ): Boolean = !collisionStrategy.canMove(flags[x, y + 1, level], CollisionFlag.BLOCK_NORTH or extraFlag)
 
     override fun isBlocked2(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
         level: Int,
         collisionStrategy: CollisionStrategy
     ): Boolean =
-        !collisionStrategy.canMove(flags[x, y + 2, level, defaultFlag], CollisionFlag.BLOCK_NORTH_WEST or extraFlag) ||
+        !collisionStrategy.canMove(flags[x, y + 2, level], CollisionFlag.BLOCK_NORTH_WEST or extraFlag) ||
             !collisionStrategy.canMove(
-                flags[x + 1, y + 2, level, defaultFlag],
+                flags[x + 1, y + 2, level],
                 CollisionFlag.BLOCK_NORTH_EAST or extraFlag
             )
 
     override fun isBlockedN(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -169,17 +159,17 @@ internal object North : Direction(0, 1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         if (!collisionStrategy.canMove(
-                flags[x, y + size, level, defaultFlag],
+                flags[x, y + size, level],
                 CollisionFlag.BLOCK_NORTH_WEST or extraFlag
             ) ||
             !collisionStrategy.canMove(
-                    flags[x + size - 1, y + size, level, defaultFlag],
+                    flags[x + size - 1, y + size, level],
                     CollisionFlag.BLOCK_NORTH_EAST or extraFlag
                 )
         ) return true
         for (midX in x + 1 until x + size - 1) {
             if (!collisionStrategy.canMove(
-                    flags[midX, y + size, level, defaultFlag],
+                    flags[midX, y + size, level],
                     CollisionFlag.BLOCK_SOUTH_EAST_AND_WEST or extraFlag
                 )
             ) {
@@ -196,32 +186,29 @@ internal object North : Direction(0, 1) {
 internal object West : Direction(-1, 0) {
     override fun isBlocked1(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
         level: Int,
         collisionStrategy: CollisionStrategy
-    ): Boolean = !collisionStrategy.canMove(flags[x - 1, y, level, defaultFlag], CollisionFlag.BLOCK_WEST or extraFlag)
+    ): Boolean = !collisionStrategy.canMove(flags[x - 1, y, level], CollisionFlag.BLOCK_WEST or extraFlag)
 
     override fun isBlocked2(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
         level: Int,
         collisionStrategy: CollisionStrategy
     ): Boolean =
-        !collisionStrategy.canMove(flags[x - 1, y, level, defaultFlag], CollisionFlag.BLOCK_SOUTH_WEST or extraFlag) ||
+        !collisionStrategy.canMove(flags[x - 1, y, level], CollisionFlag.BLOCK_SOUTH_WEST or extraFlag) ||
             !collisionStrategy.canMove(
-                flags[x - 1, y + 1, level, defaultFlag],
+                flags[x - 1, y + 1, level],
                 CollisionFlag.BLOCK_NORTH_WEST or extraFlag
             )
 
     override fun isBlockedN(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -230,17 +217,17 @@ internal object West : Direction(-1, 0) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         if (!collisionStrategy.canMove(
-                flags[x - 1, y, level, defaultFlag],
+                flags[x - 1, y, level],
                 CollisionFlag.BLOCK_SOUTH_WEST or extraFlag
             ) ||
             !collisionStrategy.canMove(
-                    flags[x - 1, y + size - 1, level, defaultFlag],
+                    flags[x - 1, y + size - 1, level],
                     CollisionFlag.BLOCK_NORTH_WEST or extraFlag
                 )
         ) return true
         for (midY in y + 1 until y + size - 1) {
             if (!collisionStrategy.canMove(
-                    flags[x - 1, midY, level, defaultFlag],
+                    flags[x - 1, midY, level],
                     CollisionFlag.BLOCK_NORTH_AND_SOUTH_EAST or extraFlag
                 )
             ) {
@@ -257,32 +244,29 @@ internal object West : Direction(-1, 0) {
 internal object East : Direction(1, 0) {
     override fun isBlocked1(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
         level: Int,
         collisionStrategy: CollisionStrategy
-    ): Boolean = !collisionStrategy.canMove(flags[x + 1, y, level, defaultFlag], CollisionFlag.BLOCK_EAST or extraFlag)
+    ): Boolean = !collisionStrategy.canMove(flags[x + 1, y, level], CollisionFlag.BLOCK_EAST or extraFlag)
 
     override fun isBlocked2(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
         level: Int,
         collisionStrategy: CollisionStrategy
     ): Boolean =
-        !collisionStrategy.canMove(flags[x + 2, y, level, defaultFlag], CollisionFlag.BLOCK_SOUTH_EAST or extraFlag) ||
+        !collisionStrategy.canMove(flags[x + 2, y, level], CollisionFlag.BLOCK_SOUTH_EAST or extraFlag) ||
             !collisionStrategy.canMove(
-                flags[x + 2, y + 1, level, defaultFlag],
+                flags[x + 2, y + 1, level],
                 CollisionFlag.BLOCK_NORTH_EAST or extraFlag
             )
 
     override fun isBlockedN(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -291,17 +275,17 @@ internal object East : Direction(1, 0) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         if (!collisionStrategy.canMove(
-                flags[x + size, y, level, defaultFlag],
+                flags[x + size, y, level],
                 CollisionFlag.BLOCK_SOUTH_EAST or extraFlag
             ) ||
             !collisionStrategy.canMove(
-                    flags[x + size, y + size - 1, level, defaultFlag],
+                    flags[x + size, y + size - 1, level],
                     CollisionFlag.BLOCK_NORTH_EAST or extraFlag
                 )
         ) return true
         for (midY in y + 1 until y + size - 1) {
             if (!collisionStrategy.canMove(
-                    flags[x + size, midY, level, defaultFlag],
+                    flags[x + size, midY, level],
                     CollisionFlag.BLOCK_NORTH_AND_SOUTH_WEST or extraFlag
                 )
             ) {
@@ -318,7 +302,6 @@ internal object East : Direction(1, 0) {
 internal object NorthEast : Direction(1, 1) {
     override fun isBlocked1(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -326,16 +309,15 @@ internal object NorthEast : Direction(1, 1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         return !collisionStrategy.canMove(
-            flags[x + 1, y + 1, level, defaultFlag],
+            flags[x + 1, y + 1, level],
             CollisionFlag.BLOCK_NORTH_EAST or extraFlag
         ) ||
-            !collisionStrategy.canMove(flags[x + 1, y, level, defaultFlag], CollisionFlag.BLOCK_EAST or extraFlag) ||
-            !collisionStrategy.canMove(flags[x, y + 1, level, defaultFlag], CollisionFlag.BLOCK_NORTH or extraFlag)
+            !collisionStrategy.canMove(flags[x + 1, y, level], CollisionFlag.BLOCK_EAST or extraFlag) ||
+            !collisionStrategy.canMove(flags[x, y + 1, level], CollisionFlag.BLOCK_NORTH or extraFlag)
     }
 
     override fun isBlocked2(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -343,22 +325,21 @@ internal object NorthEast : Direction(1, 1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         return !collisionStrategy.canMove(
-            flags[x + 1, y + 2, level, defaultFlag],
+            flags[x + 1, y + 2, level],
             CollisionFlag.BLOCK_SOUTH_EAST_AND_WEST or extraFlag
         ) ||
             !collisionStrategy.canMove(
-                flags[x + 2, y + 2, level, defaultFlag],
+                flags[x + 2, y + 2, level],
                 CollisionFlag.BLOCK_NORTH_EAST or extraFlag
             ) ||
             !collisionStrategy.canMove(
-                flags[x + 2, y + 1, level, defaultFlag],
+                flags[x + 2, y + 1, level],
                 CollisionFlag.BLOCK_NORTH_AND_SOUTH_WEST or extraFlag
             )
     }
 
     override fun isBlockedN(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -367,17 +348,17 @@ internal object NorthEast : Direction(1, 1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         if (!collisionStrategy.canMove(
-                flags[x + size, y + size, level, defaultFlag],
+                flags[x + size, y + size, level],
                 CollisionFlag.BLOCK_NORTH_EAST or extraFlag
             )
         ) return true
         for (mid in 1 until size) {
             if (!collisionStrategy.canMove(
-                    flags[x + mid, y + size, level, defaultFlag],
+                    flags[x + mid, y + size, level],
                     CollisionFlag.BLOCK_SOUTH_EAST_AND_WEST or extraFlag
                 ) ||
                 !collisionStrategy.canMove(
-                        flags[x + size, y + mid, level, defaultFlag],
+                        flags[x + size, y + mid, level],
                         CollisionFlag.BLOCK_NORTH_AND_SOUTH_WEST or extraFlag
                     )
             ) {
@@ -394,7 +375,6 @@ internal object NorthEast : Direction(1, 1) {
 internal object SouthEast : Direction(1, -1) {
     override fun isBlocked1(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -402,16 +382,15 @@ internal object SouthEast : Direction(1, -1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         return !collisionStrategy.canMove(
-            flags[x + 1, y - 1, level, defaultFlag],
+            flags[x + 1, y - 1, level],
             CollisionFlag.BLOCK_SOUTH_EAST or extraFlag
         ) ||
-            !collisionStrategy.canMove(flags[x + 1, y, level, defaultFlag], CollisionFlag.BLOCK_EAST or extraFlag) ||
-            !collisionStrategy.canMove(flags[x, y - 1, level, defaultFlag], CollisionFlag.BLOCK_SOUTH or extraFlag)
+            !collisionStrategy.canMove(flags[x + 1, y, level], CollisionFlag.BLOCK_EAST or extraFlag) ||
+            !collisionStrategy.canMove(flags[x, y - 1, level], CollisionFlag.BLOCK_SOUTH or extraFlag)
     }
 
     override fun isBlocked2(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -419,22 +398,21 @@ internal object SouthEast : Direction(1, -1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         return !collisionStrategy.canMove(
-            flags[x + 1, y - 1, level, defaultFlag],
+            flags[x + 1, y - 1, level],
             CollisionFlag.BLOCK_NORTH_EAST_AND_WEST or extraFlag
         ) ||
             !collisionStrategy.canMove(
-                flags[x + 2, y - 1, level, defaultFlag],
+                flags[x + 2, y - 1, level],
                 CollisionFlag.BLOCK_SOUTH_EAST or extraFlag
             ) ||
             !collisionStrategy.canMove(
-                flags[x + 2, y, level, defaultFlag],
+                flags[x + 2, y, level],
                 CollisionFlag.BLOCK_NORTH_AND_SOUTH_WEST or extraFlag
             )
     }
 
     override fun isBlockedN(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -443,17 +421,17 @@ internal object SouthEast : Direction(1, -1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         if (!collisionStrategy.canMove(
-                flags[x + size, y - 1, level, defaultFlag],
+                flags[x + size, y - 1, level],
                 CollisionFlag.BLOCK_SOUTH_EAST or extraFlag
             )
         ) return true
         for (mid in 1 until size) {
             if (!collisionStrategy.canMove(
-                    flags[x + size, y + mid - 1, level, defaultFlag],
+                    flags[x + size, y + mid - 1, level],
                     CollisionFlag.BLOCK_NORTH_AND_SOUTH_WEST or extraFlag
                 ) ||
                 !collisionStrategy.canMove(
-                        flags[x + mid, y - 1, level, defaultFlag],
+                        flags[x + mid, y - 1, level],
                         CollisionFlag.BLOCK_NORTH_EAST_AND_WEST or extraFlag
                     )
             ) {
@@ -470,7 +448,6 @@ internal object SouthEast : Direction(1, -1) {
 internal object NorthWest : Direction(-1, 1) {
     override fun isBlocked1(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -478,16 +455,15 @@ internal object NorthWest : Direction(-1, 1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         return !collisionStrategy.canMove(
-            flags[x - 1, y + 1, level, defaultFlag],
+            flags[x - 1, y + 1, level],
             CollisionFlag.BLOCK_NORTH_WEST or extraFlag
         ) ||
-            !collisionStrategy.canMove(flags[x - 1, y, level, defaultFlag], CollisionFlag.BLOCK_WEST or extraFlag) ||
-            !collisionStrategy.canMove(flags[x, y + 1, level, defaultFlag], CollisionFlag.BLOCK_NORTH or extraFlag)
+            !collisionStrategy.canMove(flags[x - 1, y, level], CollisionFlag.BLOCK_WEST or extraFlag) ||
+            !collisionStrategy.canMove(flags[x, y + 1, level], CollisionFlag.BLOCK_NORTH or extraFlag)
     }
 
     override fun isBlocked2(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -495,22 +471,21 @@ internal object NorthWest : Direction(-1, 1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         return !collisionStrategy.canMove(
-            flags[x - 1, y + 1, level, defaultFlag],
+            flags[x - 1, y + 1, level],
             CollisionFlag.BLOCK_NORTH_AND_SOUTH_EAST or extraFlag
         ) ||
             !collisionStrategy.canMove(
-                flags[x - 1, y + 2, level, defaultFlag],
+                flags[x - 1, y + 2, level],
                 CollisionFlag.BLOCK_NORTH_WEST or extraFlag
             ) ||
             !collisionStrategy.canMove(
-                flags[x, y + 2, level, defaultFlag],
+                flags[x, y + 2, level],
                 CollisionFlag.BLOCK_SOUTH_EAST_AND_WEST or extraFlag
             )
     }
 
     override fun isBlockedN(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -519,17 +494,17 @@ internal object NorthWest : Direction(-1, 1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         if (!collisionStrategy.canMove(
-                flags[x - 1, y + size, level, defaultFlag],
+                flags[x - 1, y + size, level],
                 CollisionFlag.BLOCK_NORTH_WEST or extraFlag
             )
         ) return true
         for (mid in 1 until size) {
             if (!collisionStrategy.canMove(
-                    flags[x - 1, y + mid, level, defaultFlag],
+                    flags[x - 1, y + mid, level],
                     CollisionFlag.BLOCK_NORTH_AND_SOUTH_EAST or extraFlag
                 ) ||
                 !collisionStrategy.canMove(
-                        flags[x + mid - 1, y + size, level, defaultFlag],
+                        flags[x + mid - 1, y + size, level],
                         CollisionFlag.BLOCK_SOUTH_EAST_AND_WEST or extraFlag
                     )
             ) {
@@ -546,7 +521,6 @@ internal object NorthWest : Direction(-1, 1) {
 internal object SouthWest : Direction(-1, -1) {
     override fun isBlocked1(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -554,16 +528,15 @@ internal object SouthWest : Direction(-1, -1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         return !collisionStrategy.canMove(
-            flags[x - 1, y - 1, level, defaultFlag],
+            flags[x - 1, y - 1, level],
             CollisionFlag.BLOCK_SOUTH_WEST or extraFlag
         ) ||
-            !collisionStrategy.canMove(flags[x - 1, y, level, defaultFlag], CollisionFlag.BLOCK_WEST or extraFlag) ||
-            !collisionStrategy.canMove(flags[x, y - 1, level, defaultFlag], CollisionFlag.BLOCK_SOUTH or extraFlag)
+            !collisionStrategy.canMove(flags[x - 1, y, level], CollisionFlag.BLOCK_WEST or extraFlag) ||
+            !collisionStrategy.canMove(flags[x, y - 1, level], CollisionFlag.BLOCK_SOUTH or extraFlag)
     }
 
     override fun isBlocked2(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -571,22 +544,21 @@ internal object SouthWest : Direction(-1, -1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         return !collisionStrategy.canMove(
-            flags[x - 1, y, level, defaultFlag],
+            flags[x - 1, y, level],
             CollisionFlag.BLOCK_NORTH_AND_SOUTH_EAST or extraFlag
         ) ||
             !collisionStrategy.canMove(
-                flags[x - 1, y - 1, level, defaultFlag],
+                flags[x - 1, y - 1, level],
                 CollisionFlag.BLOCK_SOUTH_WEST or extraFlag
             ) ||
             !collisionStrategy.canMove(
-                flags[x, y - 1, level, defaultFlag],
+                flags[x, y - 1, level],
                 CollisionFlag.BLOCK_NORTH_EAST_AND_WEST or extraFlag
             )
     }
 
     override fun isBlockedN(
         flags: Array<IntArray?>,
-        defaultFlag: Int,
         extraFlag: Int,
         x: Int,
         y: Int,
@@ -595,17 +567,17 @@ internal object SouthWest : Direction(-1, -1) {
         collisionStrategy: CollisionStrategy
     ): Boolean {
         if (!collisionStrategy.canMove(
-                flags[x - 1, y - 1, level, defaultFlag],
+                flags[x - 1, y - 1, level],
                 CollisionFlag.BLOCK_SOUTH_WEST or extraFlag
             )
         ) return true
         for (mid in 1 until size) {
             if (!collisionStrategy.canMove(
-                    flags[x - 1, y + mid - 1, level, defaultFlag],
+                    flags[x - 1, y + mid - 1, level],
                     CollisionFlag.BLOCK_NORTH_AND_SOUTH_EAST or extraFlag
                 ) ||
                 !collisionStrategy.canMove(
-                        flags[x + mid - 1, y - 1, level, defaultFlag],
+                        flags[x + mid - 1, y - 1, level],
                         CollisionFlag.BLOCK_NORTH_EAST_AND_WEST or extraFlag
                     )
             ) {

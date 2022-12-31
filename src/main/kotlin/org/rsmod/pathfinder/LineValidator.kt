@@ -34,7 +34,6 @@ import kotlin.math.abs
 public class LineValidator(
     public val searchMapSize: Int = DEFAULT_SEARCH_MAP_SIZE,
     private val flags: Array<IntArray?>,
-    private val defaultFlag: Int,
 ) {
 
     public fun hasLineOfSight(
@@ -119,8 +118,9 @@ public class LineValidator(
         val startX = coordinate(localSrcX, localDestX, srcSize)
         val startY = coordinate(localSrcY, localDestY, srcSize)
 
-        if (los && flags.isFlagged(defaultFlag, baseX, baseY, startX, startY, z, CollisionFlag.OBJECT))
+        if (los && flags.isFlagged(baseX, baseY, startX, startY, z, CollisionFlag.OBJECT)) {
             return FAILED_ROUTE
+        }
 
         val endX = coordinate(localDestX, localSrcX, destWidth)
         val endY = coordinate(localDestY, localSrcY, destHeight)
@@ -149,7 +149,7 @@ public class LineValidator(
                 val currY = scaleDown(scaledY)
 
                 if (los && currX == endX && currY == endY) xFlags = xFlags and OBJECT_PROJECTILE_BLOCKER.inv()
-                if (flags.isFlagged(defaultFlag, baseX, baseY, currX, currY, z, xFlags)) {
+                if (flags.isFlagged(baseX, baseY, currX, currY, z, xFlags)) {
                     return FAILED_ROUTE
                 }
 
@@ -157,7 +157,7 @@ public class LineValidator(
 
                 val nextY = scaleDown(scaledY)
                 if (los && currX == endX && nextY == endY) yFlags = yFlags and OBJECT_PROJECTILE_BLOCKER.inv()
-                if (nextY != currY && flags.isFlagged(defaultFlag, baseX, baseY, currX, nextY, z, yFlags)) {
+                if (nextY != currY && flags.isFlagged(baseX, baseY, currX, nextY, z, yFlags)) {
                     return FAILED_ROUTE
                 }
             }
@@ -173,7 +173,7 @@ public class LineValidator(
                 currY += offsetY
                 val currX = scaleDown(scaledX)
                 if (los && currX == endX && currY == endY) yFlags = yFlags and OBJECT_PROJECTILE_BLOCKER.inv()
-                if (flags.isFlagged(defaultFlag, baseX, baseY, currX, currY, z, yFlags)) {
+                if (flags.isFlagged(baseX, baseY, currX, currY, z, yFlags)) {
                     return FAILED_ROUTE
                 }
 
@@ -181,7 +181,7 @@ public class LineValidator(
 
                 val nextX = scaleDown(scaledX)
                 if (los && nextX == endX && currY == endY) xFlags = xFlags and OBJECT_PROJECTILE_BLOCKER.inv()
-                if (nextX != currX && flags.isFlagged(defaultFlag, baseX, baseY, nextX, currY, z, xFlags)) {
+                if (nextX != currX && flags.isFlagged(baseX, baseY, nextX, currY, z, xFlags)) {
                     return FAILED_ROUTE
                 }
             }
@@ -198,7 +198,6 @@ public class LineValidator(
     }
 
     private fun Array<IntArray?>.isFlagged(
-        defaultFlag: Int,
         baseX: Int,
         baseY: Int,
         x: Int,
@@ -206,12 +205,11 @@ public class LineValidator(
         z: Int,
         flags: Int
     ): Boolean {
-        return (this[defaultFlag, baseX, baseY, x, y, z] and flags) != 0
+        return (this[baseX, baseY, x, y, z] and flags) != 0
     }
 
     @Suppress("NOTHING_TO_INLINE")
     private inline operator fun Array<IntArray?>.get(
-        defaultFlag: Int,
         baseX: Int,
         baseY: Int,
         localX: Int,
@@ -220,7 +218,7 @@ public class LineValidator(
     ): Int {
         val x = baseX + localX
         val y = baseY + localY
-        val zone = this[getZoneIndex(x, y, z)] ?: return defaultFlag
+        val zone = this[getZoneIndex(x, y, z)] ?: return 0
         return zone[getIndexInZone(x, y)]
     }
 
