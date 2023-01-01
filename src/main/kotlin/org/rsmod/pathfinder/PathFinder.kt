@@ -12,7 +12,7 @@ import org.rsmod.pathfinder.reach.ReachStrategy
 private const val DEFAULT_RESET_ON_SEARCH = true
 internal const val DEFAULT_SEARCH_MAP_SIZE = 128
 private const val DEFAULT_RING_BUFFER_SIZE = 4096
-private const val DEFAULT_DISTANCE_VALUE = 99_999_999
+private const val DEFAULT_DISTANCE_VALUE = 999 // Default is 99_999_999 but it is unnecessary and we bitpack
 private const val DEFAULT_SRC_DIRECTION_VALUE = 99
 private const val MAX_ALTERNATIVE_ROUTE_LOWEST_COST = 1000
 private const val MAX_ALTERNATIVE_ROUTE_SEEK_RANGE = 100
