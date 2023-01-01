@@ -57,14 +57,9 @@ internal sealed class Direction(
     ): Boolean
 
     inline operator fun Array<IntArray?>.get(x: Int, y: Int, level: Int): Int {
-        val zone = this[getZoneIndex(x, y, level)] ?: return 0
+        val zone = this[getZoneIndex(x, y, level)] ?: return -1
         return zone[getIndexInZone(x, y)]
     }
-
-    inline fun getZoneIndex(x: Int, y: Int, z: Int): Int =
-        ((x shr 3) and 0x7FF) or (((y shr 3) and 0x7FF) shl 11) or ((z and 0x3) shl 22)
-
-    inline fun getIndexInZone(x: Int, y: Int): Int = (x and 0x7) or ((y and 0x7) shl 3)
 }
 
 internal object South : Direction(0, -1) {

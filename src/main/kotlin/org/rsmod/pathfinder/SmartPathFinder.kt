@@ -1487,21 +1487,21 @@ public class SmartPathFinder(
     private inline operator fun Array<IntArray?>.get(baseX: Int, baseY: Int, localX: Int, localY: Int, z: Int): Int {
         val x = baseX + localX
         val y = baseY + localY
-        val zone = this[getZoneIndex(x, y, z)] ?: return 0
+        val zone = this[getZoneIndex(x, y, z)] ?: return -1
         return zone[getIndexInZone(x, y)]
-    }
-
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun getZoneIndex(x: Int, y: Int, z: Int): Int {
-        return (x shr 3) or ((y shr 3) shl 11) or (z shl 22)
-    }
-
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun getIndexInZone(x: Int, y: Int): Int {
-        return (x and 0x7) or ((y and 0x7) shl 3)
     }
 
     private companion object {
         private val FAILED_ROUTE = Route(ArrayDeque(), alternative = false, success = false)
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun getZoneIndex(x: Int, y: Int, z: Int): Int {
+    return (x shr 3) or ((y shr 3) shl 11) or (z shl 22)
+}
+
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun getIndexInZone(x: Int, y: Int): Int {
+    return (x and 0x7) or ((y and 0x7) shl 3)
 }

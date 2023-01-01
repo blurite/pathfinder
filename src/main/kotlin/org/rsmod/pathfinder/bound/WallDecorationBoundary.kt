@@ -3,6 +3,8 @@
 package org.rsmod.pathfinder.bound
 
 import org.rsmod.pathfinder.flag.CollisionFlag
+import org.rsmod.pathfinder.getIndexInZone
+import org.rsmod.pathfinder.getZoneIndex
 
 internal fun reachWallDeco(
     flags: Array<IntArray?>,
@@ -186,16 +188,6 @@ private inline operator fun Array<IntArray?>.get(
     y: Int,
     z: Int
 ): Int {
-    val zone = this[getZoneIndex(x, y, z)] ?: return 0
+    val zone = this[getZoneIndex(x, y, z)] ?: return -1
     return zone[getIndexInZone(x, y)]
-}
-
-@Suppress("NOTHING_TO_INLINE")
-private inline fun getZoneIndex(x: Int, y: Int, z: Int): Int {
-    return ((x shr 3) and 0x7FF) or (((y shr 3) and 0x7FF) shl 11) or ((z and 0x3) shl 22)
-}
-
-@Suppress("NOTHING_TO_INLINE")
-private inline fun getIndexInZone(x: Int, y: Int): Int {
-    return (x and 0x7) or ((y and 0x7) shl 3)
 }
