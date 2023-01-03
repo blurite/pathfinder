@@ -12,18 +12,23 @@ public class NormalBlockFlagCollision : CollisionStrategy {
     }
 }
 
-public class RoofBoundFlagCollision : CollisionStrategy {
+public class IndoorsFlagCollision : CollisionStrategy {
     override fun canMove(tileFlag: Int, blockFlag: Int): Boolean {
         return (tileFlag and blockFlag) == 0 && (tileFlag and CollisionFlag.ROOF) != 0
     }
 }
 
-public class InverseBlockFlagCollision(
-    private val inverseFlag: Int
-) : CollisionStrategy {
+public class OutdoorsFlagCollision : CollisionStrategy {
+
     override fun canMove(tileFlag: Int, blockFlag: Int): Boolean {
-        val flag = blockFlag and inverseFlag.inv()
-        return (tileFlag and flag) == 0 && (tileFlag and inverseFlag) != 0
+        return (tileFlag and (blockFlag or CollisionFlag.ROOF)) == 0
+    }
+}
+
+public class BlockedFlagCollision() : CollisionStrategy {
+    override fun canMove(tileFlag: Int, blockFlag: Int): Boolean {
+        val flag = blockFlag and CollisionFlag.FLOOR.inv()
+        return (tileFlag and flag) == 0 && (tileFlag and CollisionFlag.FLOOR) != 0
     }
 }
 

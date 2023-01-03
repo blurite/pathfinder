@@ -11,7 +11,7 @@ package org.rsmod.pathfinder
  * gigabyte of memory).
  *
  * Without any flags, this object initializes as a size 16,777,216 array of
- * int arrays, all of which are null. This consumes roughly ~135mb of memory to
+ * int arrays, all of which are null. This consumes roughly ~67mb of memory to
  * initialize.
  */
 @Suppress("NOTHING_TO_INLINE")
