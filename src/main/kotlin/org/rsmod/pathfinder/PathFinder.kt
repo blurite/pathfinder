@@ -175,7 +175,7 @@ public class PathFinder(
         if (!pathFound) {
             if (!moveNear) {
                 return FAILED_ROUTE
-            } else if (!findClosestApproachPoint(localSrcX, localSrcY, localDestX, localDestY, destWidth, destHeight)) {
+            } else if (!findClosestApproachPoint(localDestX, localDestY, destWidth, destHeight)) {
                 return FAILED_ROUTE
             }
         }
@@ -1408,8 +1408,6 @@ public class PathFinder(
     }
 
     private fun findClosestApproachPoint(
-        localSrcX: Int,
-        localSrcY: Int,
         localDestX: Int,
         localDestY: Int,
         width: Int,
@@ -1454,10 +1452,7 @@ public class PathFinder(
                 }
             }
         }
-        return !(
-            lowestCost == MAX_ALTERNATIVE_ROUTE_LOWEST_COST ||
-                localSrcX == currLocalX && localSrcY == currLocalY
-            )
+        return lowestCost != MAX_ALTERNATIVE_ROUTE_LOWEST_COST
     }
 
     private fun reset() {
