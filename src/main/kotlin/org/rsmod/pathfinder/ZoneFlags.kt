@@ -48,7 +48,7 @@ public class ZoneFlags {
     /**
      * Gets the flag at the absolute coordinates [x, y, z], returning the [default] if the zone is not allocated.
      */
-    public inline operator fun get(x: Int, y: Int, z: Int, default: Int = 0): Int {
+    public inline operator fun get(x: Int, y: Int, z: Int, default: Int = -1): Int {
         val zoneCoords = ZoneCoords(x shr 3, y shr 3, z)
         val array = flags[zoneCoords.packedCoords] ?: return default
         return array[zoneLocal(x, y)]
@@ -84,7 +84,7 @@ public class ZoneFlags {
     /**
      * Gets the flag at the absolute coordinates, returning the [default] if the zone is not allocated.
      */
-    public inline operator fun get(absoluteCoords: AbsoluteCoords, default: Int = 0): Int {
+    public inline operator fun get(absoluteCoords: AbsoluteCoords, default: Int = -1): Int {
         return get(absoluteCoords.x, absoluteCoords.y, absoluteCoords.z, default)
     }
 
