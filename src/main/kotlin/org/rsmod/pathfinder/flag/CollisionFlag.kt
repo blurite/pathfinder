@@ -26,9 +26,6 @@ public object CollisionFlag {
 
     /**
      * Custom flag dedicated to blocking NPCs.
-     * It should be noted that this is a custom flag, and you do not need to use this.
-     * The pathfinder takes the flag as a custom option, so you may use any other flag, this just defines
-     * a reliable constant to use
      */
     public const val BLOCK_NPCS: Int = 0x80000
 

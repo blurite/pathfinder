@@ -24,6 +24,7 @@
 package org.rsmod.pathfinder
 
 import org.rsmod.pathfinder.flag.CollisionFlag
+import org.rsmod.pathfinder.flag.CollisionFlag.BLOCK_PLAYERS
 import org.rsmod.pathfinder.flag.CollisionFlag.OBJECT_PROJECTILE_BLOCKER
 import org.rsmod.pathfinder.flag.CollisionFlag.WALL_EAST_PROJECTILE_BLOCKER
 import org.rsmod.pathfinder.flag.CollisionFlag.WALL_NORTH_PROJECTILE_BLOCKER
@@ -148,7 +149,7 @@ public class LineValidator(
                 currX += offsetX
                 val currY = scaleDown(scaledY)
 
-                if (los && currX == endX && currY == endY) xFlags = xFlags and OBJECT_PROJECTILE_BLOCKER.inv()
+                if (los && currX == endX && currY == endY) xFlags = xFlags and LAST_TILE_EXCLUDED_FLAGS.inv()
                 if (flags.isFlagged(baseX, baseY, currX, currY, z, xFlags)) {
                     return FAILED_ROUTE
                 }
@@ -156,7 +157,7 @@ public class LineValidator(
                 scaledY += tangent
 
                 val nextY = scaleDown(scaledY)
-                if (los && currX == endX && nextY == endY) yFlags = yFlags and OBJECT_PROJECTILE_BLOCKER.inv()
+                if (los && currX == endX && nextY == endY) yFlags = yFlags and LAST_TILE_EXCLUDED_FLAGS.inv()
                 if (nextY != currY && flags.isFlagged(baseX, baseY, currX, nextY, z, yFlags)) {
                     return FAILED_ROUTE
                 }
@@ -172,7 +173,7 @@ public class LineValidator(
             while (currY != endY) {
                 currY += offsetY
                 val currX = scaleDown(scaledX)
-                if (los && currX == endX && currY == endY) yFlags = yFlags and OBJECT_PROJECTILE_BLOCKER.inv()
+                if (los && currX == endX && currY == endY) yFlags = yFlags and LAST_TILE_EXCLUDED_FLAGS.inv()
                 if (flags.isFlagged(baseX, baseY, currX, currY, z, yFlags)) {
                     return FAILED_ROUTE
                 }
@@ -180,7 +181,7 @@ public class LineValidator(
                 scaledX += tangent
 
                 val nextX = scaleDown(scaledX)
-                if (los && nextX == endX && currY == endY) xFlags = xFlags and OBJECT_PROJECTILE_BLOCKER.inv()
+                if (los && nextX == endX && currY == endY) xFlags = xFlags and LAST_TILE_EXCLUDED_FLAGS.inv()
                 if (nextX != currX && flags.isFlagged(baseX, baseY, nextX, currY, z, xFlags)) {
                     return FAILED_ROUTE
                 }
@@ -231,19 +232,40 @@ public class LineValidator(
     private companion object {
         private val FAILED_ROUTE = Route(ArrayDeque(), alternative = false, success = false)
         private val SUCCESSFUL_ROUTE = Route(ArrayDeque(), alternative = false, success = true)
-        private const val SIGHT_BLOCKED_NORTH = OBJECT_PROJECTILE_BLOCKER or WALL_NORTH_PROJECTILE_BLOCKER
-        private const val SIGHT_BLOCKED_EAST = OBJECT_PROJECTILE_BLOCKER or WALL_EAST_PROJECTILE_BLOCKER
-        private const val SIGHT_BLOCKED_SOUTH = OBJECT_PROJECTILE_BLOCKER or WALL_SOUTH_PROJECTILE_BLOCKER
-        private const val SIGHT_BLOCKED_WEST = OBJECT_PROJECTILE_BLOCKER or WALL_WEST_PROJECTILE_BLOCKER
+        private const val LAST_TILE_EXCLUDED_FLAGS = OBJECT_PROJECTILE_BLOCKER or BLOCK_PLAYERS
+        private const val SIGHT_BLOCKED_NORTH = OBJECT_PROJECTILE_BLOCKER
+            .or(WALL_NORTH_PROJECTILE_BLOCKER)
+            .or(BLOCK_PLAYERS)
+        private const val SIGHT_BLOCKED_EAST = OBJECT_PROJECTILE_BLOCKER
+            .or(WALL_EAST_PROJECTILE_BLOCKER)
+            .or(BLOCK_PLAYERS)
+        private const val SIGHT_BLOCKED_SOUTH = OBJECT_PROJECTILE_BLOCKER
+            .or(WALL_SOUTH_PROJECTILE_BLOCKER)
+            .or(BLOCK_PLAYERS)
+        private const val SIGHT_BLOCKED_WEST = OBJECT_PROJECTILE_BLOCKER
+            .or(WALL_WEST_PROJECTILE_BLOCKER)
+            .or(BLOCK_PLAYERS)
 
-        private const val WALK_BLOCKED_NORTH =
-            CollisionFlag.WALL_NORTH or CollisionFlag.OBJECT or CollisionFlag.FLOOR_DECORATION or CollisionFlag.FLOOR
-        private const val WALK_BLOCKED_EAST =
-            CollisionFlag.WALL_EAST or CollisionFlag.OBJECT or CollisionFlag.FLOOR_DECORATION or CollisionFlag.FLOOR
-        private const val WALK_BLOCKED_SOUTH =
-            CollisionFlag.WALL_SOUTH or CollisionFlag.OBJECT or CollisionFlag.FLOOR_DECORATION or CollisionFlag.FLOOR
-        private const val WALK_BLOCKED_WEST =
-            CollisionFlag.WALL_WEST or CollisionFlag.OBJECT or CollisionFlag.FLOOR_DECORATION or CollisionFlag.FLOOR
+        private const val WALK_BLOCKED_NORTH = CollisionFlag.WALL_NORTH
+            .or(CollisionFlag.OBJECT)
+            .or(CollisionFlag.FLOOR_DECORATION)
+            .or(CollisionFlag.FLOOR)
+            .or(BLOCK_PLAYERS)
+        private const val WALK_BLOCKED_EAST = CollisionFlag.WALL_EAST
+            .or(CollisionFlag.OBJECT)
+            .or(CollisionFlag.FLOOR_DECORATION)
+            .or(CollisionFlag.FLOOR)
+            .or(BLOCK_PLAYERS)
+        private const val WALK_BLOCKED_SOUTH = CollisionFlag.WALL_SOUTH
+            .or(CollisionFlag.OBJECT)
+            .or(CollisionFlag.FLOOR_DECORATION)
+            .or(CollisionFlag.FLOOR)
+            .or(BLOCK_PLAYERS)
+        private const val WALK_BLOCKED_WEST = CollisionFlag.WALL_WEST
+            .or(CollisionFlag.OBJECT)
+            .or(CollisionFlag.FLOOR_DECORATION)
+            .or(CollisionFlag.FLOOR)
+            .or(BLOCK_PLAYERS)
 
         private const val SCALE = 16
         private val HALF_TILE = scaleUp(tiles = 1) / 2
