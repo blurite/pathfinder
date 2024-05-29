@@ -119,14 +119,14 @@ public class LineValidator(
         val startX = coordinate(localSrcX, localDestX, srcSize)
         val startY = coordinate(localSrcY, localDestY, srcSize)
 
-        if (los && flags.isFlagged(baseX, baseY, startX, startY, z, CollisionFlag.OBJECT)) {
-            return FAILED_ROUTE
-        }
-
         val endX = coordinate(localDestX, localSrcX, destWidth)
         val endY = coordinate(localDestY, localSrcY, destHeight)
 
         if (startX == endX && startY == endY) return SUCCESSFUL_ROUTE
+
+        if (los && flags.isFlagged(baseX, baseY, startX, startY, z, CollisionFlag.OBJECT)) {
+            return FAILED_ROUTE
+        }
 
         val deltaX = endX - startX
         val deltaY = endY - startY
