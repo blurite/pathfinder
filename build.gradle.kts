@@ -27,7 +27,7 @@ kotlin {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
         freeCompilerArgs = listOf("-XXLanguage:+InlineClasses")
     }
 }
