@@ -124,7 +124,7 @@ public class LineValidator(
 
         if (startX == endX && startY == endY) return SUCCESSFUL_ROUTE
 
-        if (los && flags.isFlagged(baseX, baseY, startX, startY, z, CollisionFlag.OBJECT)) {
+        if (los && flags.isFlagged(baseX, baseY, startX, startY, z, OBJECT_PROJECTILE_BLOCKER)) {
             return FAILED_ROUTE
         }
 
